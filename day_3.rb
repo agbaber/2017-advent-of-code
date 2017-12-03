@@ -124,7 +124,7 @@ def find_next_number(input)
 
   matrix[x,y] = 1
 
-  ring = 1
+  (1..4).each do |ring|
     numbers_per_side = ring * 2
     y+=1
     start = x
@@ -182,6 +182,7 @@ def find_next_number(input)
       matrix[x-1,y+1] +
       matrix[x+1,y-1]
     end
+  end
 
   matrix.to_readable
 end
