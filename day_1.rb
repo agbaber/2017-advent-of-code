@@ -19,7 +19,6 @@ def split_input_part_2(input)
   array.flatten
 end
 
-
 # go through each, starting at 0, look at the next char, if they are equal, add that # to matching array
 def match_array(array)
   matching_array = []
