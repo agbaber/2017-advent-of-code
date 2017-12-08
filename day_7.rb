@@ -1291,21 +1291,35 @@ gwxeoes (27)
 gynzo (86)
 wnwzo (37)'
 
+# part 1
+
 @stacked = []
 @result = {}
-@input.split("\n").each do |disc|
-  split = disc.split
-  name = split[0]
-  weight = split[1][1...-1].to_i
-  if split[3]
-    stacked = split[3..-1].map! { |s| s.delete(',')}
-  else
-    stacked = []
+
+def parse_input
+  @input.split("\n").each do |disc|
+    split = disc.split
+    name = split[0]
+    @stacked << name
+    weight = split[1][1...-1].to_i
+    if split[3]
+      stacked = split[3..-1].map! { |s| s.delete(',')}
+      @stacked << stacked
+    else
+      stacked = []
+    end
+    @result[name] ={weight: weight, stacked: stacked}
   end
-  @result[name] ={weight: weight, stacked: stacked}
 end
 
-@stacked.flatten.each_with_object(Hash.new(0)) { |word,counts| counts[word] += 1 }
+def get_base
+  @stacked.flatten.each_with_object(Hash.new(0)) { |word,counts| counts[word] += 1 }.
+    select{|key, hash| hash == 1 }.first[0]
+end
+
+parse_input
+get_base
+
 
 # ctrl-f "=>1" lol
 
