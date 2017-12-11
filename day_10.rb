@@ -1,50 +1,87 @@
-@input = [102,255,99,252,200,24,219,57,103,2,226,254,1,0,69,216]
+sequence = '102,255,99,252,200,24,219,57,103,2,226,254,1,0,69,216'.bytes.to_a
+sequence << [17, 31, 73, 47, 23]
+sequence = sequence.flatten
 
 list = (0..255).to_a
 
-current_position = 0
-skip_size = 0
-list = (0..4).to_a
-sequence = [3, 4, 1, 5]
+@current_position = 0
+@skip_size = 0
+# list = (0..4).to_a
+# sequence = [3, 4, 1, 5]
 
-sequence.each do |seq|
-  if current_position + seq > list.size
-    puts "wrapping"
-    ending_array = list[current_position..-1]
-    ending_array_size = ending_array.size
-    beginning_array = list[0..seq - ending_array.size]
-    beginning_array_size = beginning_array.size
-    array_to_modify = ending_array + beginning_array
-    array_to_modify.reverse!
-    array_to_modify[0...beginning_array_size].each_with_index do |a,i|
-      list[i] = a
-    end
-    puts list.inspect
+# sequence = '1,2,3'.bytes.to_a
+# sequence << [17, 31, 73, 47, 23]
+# sequence = sequence.flatten
 
-    array_to_modify[beginning_array_size...-1].each_with_index do |a,i|
-      list[i] = a
-    end
-  else
-    puts "not wrapping"
-    array_to_modify = list[current_position...current_position+seq]
-    array_to_modify.reverse!
-    array_to_modify.each_with_index do |a,i|
-      list[current_position + i] = a
-    end
-    puts list.inspect
+64.times do
+  sequence.each do |seq|
+    puts "STARTING SEQ #{seq}"
+    if @current_position + seq > list.size
+      puts "wrapping"
+      ending_array = list[@current_position..-1]
+      ending_array_size = ending_array.size
+      puts "ending array is #{ending_array.inspect}"
+      beginning_array = list[0...seq - ending_array.size]
+      puts "beginning array is #{beginning_array.inspect}"
+      beginning_array_size = beginning_array.size
+      array_to_modify = ending_array + beginning_array
+      puts "array_to_modify is #{array_to_modify.inspect}"
+      array_to_modify.reverse!
+      puts "reversed array_to_modify is #{array_to_modify.inspect}"
+      # array_to_modify.rotate(@current_position)
+      array_to_modify[0...ending_array_size].each_with_index do |a,i|
+        list[@current_position+i] = a
+      end
+      puts list.inspect
 
+      array_to_modify[-beginning_array_size..-1].each_with_index do |a,i|
+        list[i] = a
+      end
+
+      puts list.inspect
+    else
+      puts "not wrapping"
+      array_to_modify = list[@current_position...@current_position+seq]
+      array_to_modify.reverse!
+      array_to_modify.each_with_index do |a,i|
+        list[@current_position + i] = a
+      end
+      puts list.inspect
+
+    end
+
+    if @current_position + seq + @skip_size > list.size
+      @current_position = (@current_position + seq + @skip_size) % list.size
+    else
+      @current_position = @current_position + seq + @skip_size
+    end
+    puts "@current_position is #{@current_position}"
+    @skip_size += 1
   end
-
-  if current_position + seq + skip_size > list.size
-    current_position = current_position + seq + skip_size - list.size
-  else
-    current_position = current_position + seq + skip_size
-  end
-  skip_size += 1
+  @list = list
 end
 
-list
+foo = []
+@list.each_slice(16) do |chunk|
+  foo << chunk.inject(:^)
+end
 
+result = []
+foo.each do |hex|
+  if hex.to_s(16).size == 1
+    result << '0' + hex.to_s(16)
+  else
+    result << hex.to_s(16)
+  end
+end
+
+result.join
+
+#=> 44f4befb0f303c0bafd085f97741d51d
+
+
+list[0] * list[1]
+#=>5577
 
 
 
