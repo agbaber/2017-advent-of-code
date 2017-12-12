@@ -1320,35 +1320,15 @@ end
 parse_input
 get_base
 
-
-# ctrl-f "=>1" lol
-
-# ahnofa
-
 #-- part 2
 
-# ahnofa (7) -> xdpxpu, uewmev, awrwywl, hwezjo, qqqxyrl, luralcy
-
-def how_deep
-  result = "ahnofa"
-  until result.size == 0
-    result = @result[result][:stacked].first
-    puts result
-  end
-end
-
-
 def run
-    @result["ahnofa"][:stacked].each do |stack|
-      @result[stack][:combined_weight] = 0
-      @result[stack][:combined_weight] += aggregate_children_amounts(@result[stack][:stacked])
-      @result[stack][:combined_weight] += @result[stack][:weight]
-      puts @result[stack]
-    end
+  @result[get_base][:stacked].each do |stack|
+    @result[stack][:combined_weight] = 0
+    @result[stack][:combined_weight] += aggregate_children_amounts(@result[stack][:stacked])
+    @result[stack][:combined_weight] += @result[stack][:weight]
   end
 end
-
-private
 
 def aggregate_children_amounts(children)
   sum = 0
@@ -1375,6 +1355,7 @@ def aggregate_child_amounts(child)
 end
 
 run
+
 
 {:weight=>65117, :stacked=>["zsfuc", "litns", "cslci"], :combined_weight=>69875}
 {:weight=>32519, :stacked=>["yvngku", "kvgcvel", "xupjwd"], :combined_weight=>69875}
