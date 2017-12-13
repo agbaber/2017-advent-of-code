@@ -42,10 +42,10 @@
 84: 14
 88: 20'
 
-@input = '0: 3
-1: 2
-4: 4
-6: 4'
+# @input = '0: 3
+# 1: 2
+# 4: 4
+# 6: 4'
 
 firewall = []
 @input.split("\n").each do |i|
@@ -57,7 +57,7 @@ firewall.each do |f|
   columns << f[0]
 end
 
-whole_firewall = (0..6).to_a
+whole_firewall = (0..88).to_a
 
 firewall.each do |f|
   whole_firewall[f[0]] = f
@@ -91,7 +91,7 @@ end
 packet_position = 0
 cost = 0
 
-7.times do |step|
+89.times do |step|
   if whole_firewall[packet_position] && whole_firewall[packet_position][1].size > 0 && whole_firewall[packet_position][1][0] == 'S'
     cost += (packet_position * whole_firewall[packet_position][1].size)
     puts "adding #{packet_position} * #{whole_firewall[packet_position][1].size}"
@@ -119,7 +119,8 @@ cost = 0
   packet_position+=1
 end
 
-
+cost
+#=> 1624
 # not 56
 
 __END__
