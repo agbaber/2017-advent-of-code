@@ -309,3 +309,4 @@ In the example above, the trip severity is 0*3 + 6*4 = 24.
 
 Given the details of the firewall you've recorded, if you leave immediately, what is the severity of
 your whole trip?
+
