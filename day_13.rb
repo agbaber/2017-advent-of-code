@@ -57,20 +57,20 @@ firewall.each do |f|
   columns << f[0]
 end
 
-whole_firewall = (0..88).to_a
+@whole_firewall = (0..88).to_a
 
 firewall.each do |f|
-  whole_firewall[f[0]] = f
+  @whole_firewall[f[0]] = f
 end
 
-whole_firewall.each do |wf|
+@whole_firewall.each do |wf|
   if wf.is_a?(Integer)
-    whole_firewall[wf] = [wf,0]
+    @whole_firewall[wf] = [wf,0]
   end
 end
 
 formatted_wall = []
-whole_firewall.each do |wf|
+@whole_firewall.each do |wf|
   if wf[1] > 0
     foo = 'F'
   else 
@@ -81,43 +81,64 @@ whole_firewall.each do |wf|
   formatted_wall << wf
 end
 
-whole_firewall.each do |wf|
+@whole_firewall.each do |wf|
   unless wf[1].size == 0
     wf[1][0] = 'S'
   end
 end
 
+@dup_firewall = Marshal.load(Marshal.dump(@whole_firewall))
 
-packet_position = 0
-cost = 0
 
-89.times do |step|
-  if whole_firewall[packet_position] && whole_firewall[packet_position][1].size > 0 && whole_firewall[packet_position][1][0] == 'S'
-    cost += (packet_position * whole_firewall[packet_position][1].size)
-    puts "adding #{packet_position} * #{whole_firewall[packet_position][1].size}"
-  end
-
-  whole_firewall.each do |advance|
+def wait_and_move
+  @whole_firewall.each do |advance|
     if advance[1].size > 0
       if advance[2] == 'down' && advance[1][-1] != 'S'
-        whole_firewall[advance[0]][1].rotate!(-1)
+        @whole_firewall[advance[0]][1].rotate!(-1)
       elsif advance[2] == 'down' && advance[1][-1] == 'S'
-        whole_firewall[advance[0]][2] = 'up'
-        whole_firewall[advance[0]][1].rotate!(1)
+        @whole_firewall[advance[0]][2] = 'up'
+        @whole_firewall[advance[0]][1].rotate!(1)
       elsif advance[2] == 'up' && advance[1][0] != 'S'
-        whole_firewall[advance[0]][1].rotate!(1)
+        @whole_firewall[advance[0]][1].rotate!(1)
       elsif advance[2] == 'up' && advance[1][0] == 'S'
-        whole_firewall[advance[0]][2] = 'down'
-        whole_firewall[advance[0]][1].rotate!(-1)
+        @whole_firewall[advance[0]][2] = 'down'
+        @whole_firewall[advance[0]][1].rotate!(-1)
       end
     end
   end
-
-  puts whole_firewall.inspect
-
-  whole_firewall
-  packet_position+=1
 end
+
+wait = 3923398
+
+loop do
+  packet_position = 0
+  @cost = 0
+
+  @whole_firewall = Marshal.load(Marshal.dump(@dup_firewall))
+
+  wait.times do wait_and_move end
+
+  89.times do |step|
+    if @whole_firewall[packet_position] && @whole_firewall[packet_position][1].size > 0 && @whole_firewall[packet_position][1][0] == 'S'
+      @cost += (packet_position * @whole_firewall[packet_position][1].size)
+      # puts "adding #{packet_position} * #{@whole_firewall[packet_position][1].size}"
+    end
+
+
+    wait_and_move
+
+    packet_position+=1
+  end
+  if @cost == 0
+    puts "wait was #{wait}"
+  else
+    puts "wait was #{wait}"
+    puts "@cost was #{@cost}"
+
+    wait +=38
+  end
+end
+
 
 cost
 #=> 1624
