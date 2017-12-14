@@ -77,7 +77,7 @@ end
 #88: 20
 
 def detected_at(position, time, skip)
-  # puts "position is #{position}, time is #{time}, skip is #{skip}"
+  puts "position is #{position}, time is #{time}, skip is #{skip}"
   return (time % (2 + (2 * (position - 2))) ) == 0
 end
 
