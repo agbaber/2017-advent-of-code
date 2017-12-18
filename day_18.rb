@@ -70,79 +70,266 @@ end
 
 @last_sound_played = 0
 
-def do_instructions
-  start_index = @start_index
-  @instructions[start_index..-1].each do |instruction|
-    puts ">>>"
+# def do_instructions
+#   start_index = @start_index
+#   @instructions[start_index..-1].each do |instruction|
+#     puts ">>>"
 
-    puts "#{instruction.inspect}"
-    case instruction[0]
-    when 'snd'
-      @last_sound_played = @registers[instruction[1]]
-    when 'set'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = instruction[2]
-      else
-        @registers[instruction[1]] = @registers[instruction[2]]
-      end
-    when 'add'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = @registers[instruction[1]].to_i + instruction[2].to_i
-      else
-        @registers[instruction[1]] = @registers[instruction[1]].to_i + @registers[instruction[2]].to_i
-      end
-    when 'mul'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = @registers[instruction[1]].to_i * instruction[2].to_i
-      else
-        @registers[instruction[1]] = @registers[instruction[1]].to_i * @registers[instruction[2]].to_i
-      end
-    when 'mod'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = (@registers[instruction[1]].to_i % instruction[2].to_i)
-      else
-        result = (@registers[instruction[1]].to_i % @registers[instruction[2]].to_i)
-        puts result
-        @registers[instruction[1]] = result
-      end
-    when 'rcv'
-      if @last_sound_played != 0
-        @registers[instruction[1]] = @last_sound_played
-        puts "last_sound_played #{@last_sound_played}"
-        @it_happened = true
-        break
-      else
-      end
-    when 'jgz'
-      check_num = (instruction[1].to_i.to_s == instruction[1])
+#     puts "#{instruction.inspect}"
+#     case instruction[0]
+#     when 'snd'
+#       @last_sound_played = @registers[instruction[1]]
+#     when 'set'
+#       if instruction[2].to_i.to_s == instruction[2]
+#         @registers[instruction[1]] = instruction[2]
+#       else
+#         @registers[instruction[1]] = @registers[instruction[2]]
+#       end
+#     when 'add'
+#       if instruction[2].to_i.to_s == instruction[2]
+#         @registers[instruction[1]] = @registers[instruction[1]].to_i + instruction[2].to_i
+#       else
+#         @registers[instruction[1]] = @registers[instruction[1]].to_i + @registers[instruction[2]].to_i
+#       end
+#     when 'mul'
+#       if instruction[2].to_i.to_s == instruction[2]
+#         @registers[instruction[1]] = @registers[instruction[1]].to_i * instruction[2].to_i
+#       else
+#         @registers[instruction[1]] = @registers[instruction[1]].to_i * @registers[instruction[2]].to_i
+#       end
+#     when 'mod'
+#       if instruction[2].to_i.to_s == instruction[2]
+#         @registers[instruction[1]] = (@registers[instruction[1]].to_i % instruction[2].to_i)
+#       else
+#         result = (@registers[instruction[1]].to_i % @registers[instruction[2]].to_i)
+#         puts result
+#         @registers[instruction[1]] = result
+#       end
+#     when 'rcv'
+#       if @last_sound_played != 0
+#         @registers[instruction[1]] = @last_sound_played
+#         puts "last_sound_played #{@last_sound_played}"
+#         @it_happened = true
+#         break
+#       else
+#       end
+#     when 'jgz'
+#       check_num = (instruction[1].to_i.to_s == instruction[1])
 
-      if (check_num && instruction[1].to_i > 0) || @registers[instruction[1]].to_i > 0
-        if instruction[2].to_i.to_s == instruction[2]
-          @start_index = (instruction[2].to_i + instruction[3] -1)
-          # @start_index < 0 ? @start_index -=1 : @start_index +=1
+#       if (check_num && instruction[1].to_i > 0) || @registers[instruction[1]].to_i > 0
+#         if instruction[2].to_i.to_s == instruction[2]
+#           @start_index = (instruction[2].to_i + instruction[3] -1)
+#           # @start_index < 0 ? @start_index -=1 : @start_index +=1
             
-          puts "jumping"
-          break
-        else
-          @start_index = (@registers[instruction[2]] + instruction[3])
-          puts "jumping"
-          break
-        end
+#           puts "jumping"
+#           break
+#         else
+#           @start_index = (@registers[instruction[2]] + instruction[3])
+#           puts "jumping"
+#           break
+#         end
+#       end
+#     end
+#     puts @registers.inspect
+#   end
+#   @start_index +=1
+# end
+
+
+def do_instructions_1
+  start_index = @start_index_1
+  instruction = @instructions[start_index]
+    # puts ">>>"
+
+    # puts "#{instruction.inspect}"
+  case instruction[0]
+  when 'snd'
+    @t1_send << @t1_registers[instruction[1]]
+    # puts "t1 send #{@t1_send}"
+    @t2_waiting = false
+    # puts "t1_send_count #{@t1_send_count}"
+  when 'set'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t1_registers[instruction[1]] = instruction[2]
+    else
+      @t1_registers[instruction[1]] = @t1_registers[instruction[2]]
+    end
+  when 'add'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i + instruction[2].to_i
+    else
+      @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i + @t1_registers[instruction[2]].to_i
+    end
+  when 'mul'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i * instruction[2].to_i
+    else
+      @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i * @t1_registers[instruction[2]].to_i
+    end
+  when 'mod'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t1_registers[instruction[1]] = (@t1_registers[instruction[1]].to_i % instruction[2].to_i)
+    else
+      result = (@t1_registers[instruction[1]].to_i % @t1_registers[instruction[2]].to_i)
+      # puts result
+      @t1_registers[instruction[1]] = result
+    end
+  when 'rcv'
+    if @t2_send[0] == nil
+      # puts 'waiting'
+
+      @t1_waiting ||= true
+      return true
+    end
+
+    @t1_registers[instruction[1]] = @t2_send[0]
+    @t2_send.shift(1)
+    @t1_waiting = false
+  when 'jgz'
+    check_num = (instruction[1].to_i.to_s == instruction[1])
+
+    if (check_num && instruction[1].to_i > 0) || @t1_registers[instruction[1]].to_i > 0
+      if instruction[2].to_i.to_s == instruction[2]
+        @start_index_1 = (instruction[2].to_i + instruction[3] -1)
+        # @start_index < 0 ? @start_index -=1 : @start_index +=1
+          
+        # puts "jumping"
+        return
+      else
+        @start_index_1 = (@t1_registers[instruction[2]] + instruction[3])
+        # puts "jumping"
+        return
       end
     end
-    puts @registers.inspect
   end
-  @start_index +=1
+    # puts @t1_registers.inspect
+  unless @t1_waiting
+    @start_index_1 +=1
+  end
+  puts @start_index_1
+end
+
+def do_instructions_2
+  start_index = @start_index_2
+  instruction = @instructions[start_index]
+    # puts ">>>"
+
+    # puts "#{instruction.inspect}"
+  case instruction[0]
+  when 'snd'
+    @t2_send << @t2_registers[instruction[1]]
+    @t2_send_count +=1
+
+    @t1_waiting = false
+    # puts "t2 send #{@t2_send}"
+  when 'set'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t2_registers[instruction[1]] = instruction[2]
+    else
+      @t2_registers[instruction[1]] = @t2_registers[instruction[2]]
+    end
+  when 'add'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i + instruction[2].to_i
+    else
+      @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i + @t2_registers[instruction[2]].to_i
+    end
+  when 'mul'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i * instruction[2].to_i
+    else
+      @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i * @t2_registers[instruction[2]].to_i
+    end
+  when 'mod'
+    if instruction[2].to_i.to_s == instruction[2]
+      @t2_registers[instruction[1]] = (@t2_registers[instruction[1]].to_i % instruction[2].to_i)
+    else
+      result = (@t2_registers[instruction[1]].to_i % @t2_registers[instruction[2]].to_i)
+      # puts result
+      @t2_registers[instruction[1]] = result
+    end
+  when 'rcv'
+    if @t1_send[0] == nil
+      # puts 'waiting2'
+      @t2_waiting ||= true
+      return true
+    end
+
+    @t2_registers[instruction[1]] = @t1_send[0]
+    @t1_send.shift(1)
+    @t2_recieved_count +=1
+    @t2_waiting = false
+  when 'jgz'
+    check_num = (instruction[1].to_i.to_s == instruction[1])
+
+    if (check_num && instruction[1].to_i > 0) || @t2_registers[instruction[1]].to_i > 0
+      if instruction[2].to_i.to_s == instruction[2]
+        @start_index_2 = (instruction[2].to_i + instruction[3] -1)
+        # @start_index < 0 ? @start_index -=1 : @start_index +=1
+          
+        # puts "jumping"
+        return
+      else
+        @start_index_2 = (@t2_registers[instruction[2]] + instruction[3])
+        # puts "jumping"
+        return
+      end
+    end
+  end
+    # puts @t2_registers.inspect
+  unless @t2_waiting
+    @start_index_2 +=1
+  end
+  puts @start_index_2
 end
 
 @start_index = 0
-@it_happened = false
-until @it_happened
-  do_instructions
+# @it_happened = false
+# until @it_happened
+#   do_instructions
+# end
+
+# in t1 p starts at 0
+# in t2 p starts at 1
+
+@t1_registers = @registers.dup
+@t2_registers = @registers.dup
+@t2_registers['p'] = 1
+@t1_send = []
+@t2_send = []
+@start_index_1 = 0
+@start_index_2 = 0
+@t2_send_count = 0
+@t2_recieved_count = 0
+@t1_waiting = false
+@t2_waiting = false
+
+loop do
+  until @t1_waiting do
+    do_instructions_1
+  end
+  puts "t1 send: #{@t1_send.inspect}"
+  until @t2_waiting do
+    do_instructions_2
+  end
+  puts "t2 send: #{@t2_send.inspect}"
+  puts "#{@t2_send_count}"
 end
 
+puts "#{@t1_send_count}"
+
+
+puts "t1 send is #{@t1_send_count}"
+puts "t2 recv is #{@t2_recieved_count}"
 #not 6142 - too high
 #not 1
+
+
+# part 2 not 24
+# not 12
+# 128 too low
+# not 19330
+# 7112
 
 
 __END__
