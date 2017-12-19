@@ -42,6 +42,19 @@ jgz f -16
 jgz a -19
 EOM
 
+# @input = <<-EOM
+# set a 1
+# add a 2
+# mul a a
+# mod a 5
+# snd a
+# set a 0
+# rcv a
+# jgz a -1
+# set a 1
+# jgz a -2
+# EOM
+
 @instructions = []
 @input.chomp.split("\n").each_with_index do |instruction,i|
   compiled = instruction.split(' ')
@@ -55,84 +68,72 @@ letters.each do |l|
   @registers[l] = 0
 end
 
-@last_sound_played = 0
+def integer?(input)
+  input.to_i.to_s == input
+end
 
 def do_instructions
   start_index = @start_index
-  @instructions[start_index..-1].each do |instruction|
-    puts ">>>"
+  @instructions[start_index..-1].each do |ins|
 
-    puts "#{instruction.inspect}"
-    case instruction[0]
+    case ins[0]
     when 'snd'
-      @last_sound_played = @registers[instruction[1]]
+      # NEW SEND INSTRUCTIONS
     when 'set'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = instruction[2]
+      if integer?(ins[2])
+        @registers[ins[1]] = ins[2]
       else
-        @registers[instruction[1]] = @registers[instruction[2]]
+        @registers[ins[1]] = @registers[ins[2]]
       end
     when 'add'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = @registers[instruction[1]].to_i + instruction[2].to_i
+      if integer?(ins[2])
+        @registers[ins[1]] = @registers[ins[1]].to_i + ins[2].to_i
       else
-        @registers[instruction[1]] = @registers[instruction[1]].to_i + @registers[instruction[2]].to_i
+        @registers[ins[1]] = @registers[ins[1]].to_i + @registers[ins[2]].to_i
       end
     when 'mul'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = @registers[instruction[1]].to_i * instruction[2].to_i
+      if integer?(ins[2])
+        @registers[ins[1]] = @registers[ins[1]].to_i * ins[2].to_i
       else
-        @registers[instruction[1]] = @registers[instruction[1]].to_i * @registers[instruction[2]].to_i
+        @registers[ins[1]] = @registers[ins[1]].to_i * @registers[ins[2]].to_i
       end
     when 'mod'
-      if instruction[2].to_i.to_s == instruction[2]
-        @registers[instruction[1]] = (@registers[instruction[1]].to_i % instruction[2].to_i)
+      if integer?(ins[2])
+        @registers[ins[1]] = (@registers[ins[1]].to_i % ins[2].to_i)
       else
-        result = (@registers[instruction[1]].to_i % @registers[instruction[2]].to_i)
+        result = (@registers[ins[1]].to_i % @registers[ins[2]].to_i)
         puts result
-        @registers[instruction[1]] = result
+        @registers[ins[1]] = result
       end
     when 'rcv'
-      if @last_sound_played != 0
-        @registers[instruction[1]] = @last_sound_played
-        puts "last_sound_played #{@last_sound_played}"
-        @it_happened = true
-        break
-      else
-      end
+      #NEW RECEIVE INSTRUCTIONS
     when 'jgz'
-      check_num = (instruction[1].to_i.to_s == instruction[1])
-
-      if (check_num && instruction[1].to_i > 0) || @registers[instruction[1]].to_i > 0
-        if instruction[2].to_i.to_s == instruction[2]
-          @start_index = (instruction[2].to_i + instruction[3] -1)
-          # @start_index < 0 ? @start_index -=1 : @start_index +=1
-            
-          puts "jumping"
-          break
+      if (integer?(ins[1]) && ins[1].to_i > 0) || @registers[ins[1]].to_i > 0
+        if ins[2].to_i.to_s == ins[2]
+          @start_index = (ins[2].to_i + ins[3] -1)
         else
-          @start_index = (@registers[instruction[2]] + instruction[3])
-          puts "jumping"
-          break
+          @start_index = (@registers[ins[2]] + ins[3])
         end
       end
     end
-    puts @registers.inspect
   end
   @start_index +=1
 end
 
-@start_index = 0
-@it_happened = false
-until @it_happened
-  do_instructions
-end
 
-#last_sound_played 3188 - answer
+@t1_registers = @registers.dup
+@t2_registers = @registers.dup
+@t2_registers['p'] = 1
+@t1_send = []
+@t2_send = []
+@start_index_1 = 0
+@start_index_2 = 0
+@t2_send_count = 0
+@t1_waiting = false
+@t2_waiting = false
 
 
-#not 6142 - too high
-#not 1
+# 7112
 
 
 __END__
@@ -237,3 +238,4 @@ example, program 0 might have sent all three values and then stopped at the firs
 
 Once both of your programs have terminated (regardless of what caused them to do so), how many times
 did program 1 send a value?
+
