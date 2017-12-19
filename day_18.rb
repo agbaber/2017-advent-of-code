@@ -137,34 +137,40 @@ end
 
 
 def do_instructions_1
-  start_index = @start_index_1
-  @instructions[start_index..-1].each do |instruction|
+  instruction = @instructions[@start_index_1]
+    # puts instruction.inspect
     # puts ">>>"
 
-    # puts "#{instruction.inspect}"
+    puts "#{instruction.inspect}"
     case instruction[0]
     when 'snd'
       @t1_send << @t1_registers[instruction[1]]
       # puts "t1 send #{@t1_send}"
       # puts "t1_send_count #{@t1_send_count}"
+      @t2_waiting = false
+      @start_index_1 +=1
     when 'set'
+      # puts instruction[2]
       if instruction[2].to_i.to_s == instruction[2]
         @t1_registers[instruction[1]] = instruction[2]
       else
         @t1_registers[instruction[1]] = @t1_registers[instruction[2]]
       end
+      @start_index_1 +=1
     when 'add'
       if instruction[2].to_i.to_s == instruction[2]
         @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i + instruction[2].to_i
       else
         @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i + @t1_registers[instruction[2]].to_i
       end
+      @start_index_1 +=1
     when 'mul'
       if instruction[2].to_i.to_s == instruction[2]
         @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i * instruction[2].to_i
       else
         @t1_registers[instruction[1]] = @t1_registers[instruction[1]].to_i * @t1_registers[instruction[2]].to_i
       end
+      @start_index_1 +=1
     when 'mod'
       if instruction[2].to_i.to_s == instruction[2]
         @t1_registers[instruction[1]] = (@t1_registers[instruction[1]].to_i % instruction[2].to_i)
@@ -173,47 +179,55 @@ def do_instructions_1
         # puts result
         @t1_registers[instruction[1]] = result
       end
+      @start_index_1 +=1
     when 'rcv'
-      until @t2_send[0] != nil
+      if @t2_send.empty?
         # puts 'waiting'
-        @t1_waiting ||= true
+        # puts '!!!!'
+        @t1_waiting = true
+      else
+        # puts '????'
+        @t1_registers[instruction[1]] = @t2_send[0]
+        @t2_send.shift(1)
+        @t1_waiting = false
+        @start_index_1 +=1
       end
-
-      @t1_registers[instruction[1]] = @t2_send[0]
-      @t2_send.shift(1)
-      @t1_waiting = false
     when 'jgz'
+      # puts instruction.inspect
+      # puts instruction[1].inspect
+      # puts instruction[2].inspect
+      # puts instruction[3].inspect
       check_num = (instruction[1].to_i.to_s == instruction[1])
 
       if (check_num && instruction[1].to_i > 0) || @t1_registers[instruction[1]].to_i > 0
         if instruction[2].to_i.to_s == instruction[2]
-          @start_index_1 = (instruction[2].to_i + instruction[3] -1)
+          @start_index_1 = (instruction[2].to_i + instruction[3] )
           # @start_index < 0 ? @start_index -=1 : @start_index +=1
             
           # puts "jumping"
-          break
         else
+          # puts "instruction 2 is #{instruction[2]} and instruciton 3 is instruction[3]"
           @start_index_1 = (@t1_registers[instruction[2]] + @t1_registers[instruction[3]])
           # puts "jumping"
-          break
         end
+      else
+        @start_index_1 +=1
       end
     end
     # puts @t1_registers.inspect
-  end
-  @start_index_1 +=1
 end
 
 def do_instructions_2
-  start_index = @start_index_2
-  @instructions[start_index..-1].each do |instruction|
+  instruction = @instructions[@start_index_2]
     # puts ">>>"
 
-    # puts "#{instruction.inspect}"
+    puts "#{instruction.inspect}"
     case instruction[0]
     when 'snd'
       @t2_send << @t2_registers[instruction[1]]
       @t2_send_count += 1
+      @t1_waiting = false
+      @start_index_2 +=1
       # puts "t2 send #{@t2_send}"
     when 'set'
       if instruction[2].to_i.to_s == instruction[2]
@@ -221,18 +235,21 @@ def do_instructions_2
       else
         @t2_registers[instruction[1]] = @t2_registers[instruction[2]]
       end
+      @start_index_2 +=1
     when 'add'
       if instruction[2].to_i.to_s == instruction[2]
         @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i + instruction[2].to_i
       else
         @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i + @t2_registers[instruction[2]].to_i
       end
+      @start_index_2 +=1
     when 'mul'
       if instruction[2].to_i.to_s == instruction[2]
         @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i * instruction[2].to_i
       else
         @t2_registers[instruction[1]] = @t2_registers[instruction[1]].to_i * @t2_registers[instruction[2]].to_i
       end
+      @start_index_2 +=1
     when 'mod'
       if instruction[2].to_i.to_s == instruction[2]
         @t2_registers[instruction[1]] = (@t2_registers[instruction[1]].to_i % instruction[2].to_i)
@@ -241,39 +258,40 @@ def do_instructions_2
         # puts result
         @t2_registers[instruction[1]] = result
       end
+      @start_index_2 +=1
     when 'rcv'
-      until @t1_send[0] != nil
+      if @t1_send.empty?
         # puts 'waiting2'
-        @t2_waiting ||= true
+        # puts '!!!!'
+        @t2_waiting = true
+      else
+        # puts '????'
+        @t2_registers[instruction[1]] = @t1_send[0]
+        @t1_send.shift(1)
+        @t2_waiting = false
+        @start_index_2 +=1
       end
-
-      @t2_registers[instruction[1]] = @t1_send[0]
-      @t1_send.shift(1)
-      @t2_recieved_count +=1
-      @t2_waiting = false
     when 'jgz'
       check_num = (instruction[1].to_i.to_s == instruction[1])
 
       if (check_num && instruction[1].to_i > 0) || @t2_registers[instruction[1]].to_i > 0
         if instruction[2].to_i.to_s == instruction[2]
-          @start_index_2 = (instruction[2].to_i + instruction[3] -1)
+          @start_index_2 = (instruction[2].to_i + instruction[3] )
           # @start_index < 0 ? @start_index -=1 : @start_index +=1
             
           # puts "jumping"
-          break
         else
           @start_index_2 = (@t2_registers[instruction[2]] + @t2_registers[instruction[3]])
           # puts "jumping"
-          break
         end
+      else
+        @start_index_2 +=1
       end
     end
     # puts @t2_registers.inspect
-  end
-  @start_index_2 +=1
 end
 
-@start_index = 0
+# @start_index = 0
 # @it_happened = false
 # until @it_happened
 #   do_instructions
@@ -290,21 +308,30 @@ end
 @start_index_1 = 0
 @start_index_2 = 0
 @t2_send_count = 0
-@t2_recieved_count = 0
 @t1_waiting = false
 @t2_waiting = false
 
-until @t1_waiting && @t2_waiting do
-  t1 = Thread.new{loop do do_instructions_1 end}
-  t2 = Thread.new{loop do do_instructions_2 end}
-  t3 = Thread.new{ loop do puts "t1 send is #{@t1_send_count}"
-      puts "t2 recv is #{@t2_recieved_count}"
-      sleep 1
-    end}
+# until @t1_waiting
+#   do_instructions_1
+# end
+
+# until @t2_waiting
+#   do_instructions_2
+# end
+until @t1_waiting && @t2_waiting
+    100.times do do_instructions_1 end
+  # until @t2_waiting || @start_index_2 > @instructions.size
+  #   do_instructions_2
+  #   puts @t2_send.inspect
+  # end
+
+    100.times do do_instructions_2 end
+  # puts "@t1_waiting #{@t1_waiting}"
+  # puts "@t2_waiting #{@t2_waiting}"
 end
 
-puts "t1 send is #{@t1_send_count}"
-puts "t2 recv is #{@t2_recieved_count}"
+puts "t2 send is #{@t2_send_count}"
+
 #not 6142 - too high
 #not 1
 
