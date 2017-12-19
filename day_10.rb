@@ -84,7 +84,23 @@ list[0] * list[1]
 #=>5577
 
 
+class Matrix
+  def to_readable
+    i = 0
+    self.each do |number|
+      print number.to_s + " "
+      i+= 1
+      if i == self.column_size
+        print "\n"
+        i = 0
+      end
+    end
+  end
 
+  def []=(i, j, x)
+    @rows[i][j] = x
+  end
+end
 
 __END__
 

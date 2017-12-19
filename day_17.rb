@@ -27,8 +27,19 @@ def step
   end
 end
 
+@vals = []
+
+@spinlock = [0]
+@current_position = 0
+@i = 1
+@input = 386
 50000000.times do
-  step
+  @current_position = (@current_position + @input) % @i
+  if @current_position == 0
+    @vals << @i 
+  end
+  @current_position += 1
+  @i += 1
 end
 
 ind = @spinlock.find_index(0)
